@@ -2,35 +2,29 @@
 
 import os,sys
 
-os.system("ps -e -o pid,comm,etime | grep -m 1 \"\<smbd\>\" > /tmp/temp")
+x = os.popen("ps -e -o pid,comm,etime | grep -m 1 \"\<smbd\>\"").read()
 
-fileIn = open("/tmp/temp", "r")
-
-for line in fileIn:
-    x = line
-    x = x[11:]
-    x = x.strip()
-    stamp = x
-
+x = x[11:]
+x = x.strip()
 minutes = int(x[-5:-3])
-#print(x)
-#print(minutes)
+
 if len(x) > 5:
-    print "OK - smbd up for " + stamp
+    print "OK - smbd up for " + x
+    sys.exit(0)
 
-else:
-    if minutes > 15:
-        print "OK - smbd up for " + stamp
-        sys.exit(0)
-
-    elif minutes > 10:
-        print "WARNING - smbd up for " + stamp
-        sys.exit(1)
-
-    elif minutes > 5:
-        print "CRITICAL - smbd up for " + stamp
+elif len(x) <= 5:
+    if minutes < 5:
+        print "CRITICAL - smbd up for " + x
         sys.exit(2)
 
-    else:
-        print "UNKNOWN - check service"
-        sys.exit(3)
+    elif minutes > 5 and minutes < 10:
+        print "WARNING - smbd up for " + x
+        sys.exit(1)
+
+    elif minutes > 10:
+        print "Service OK - smbd up for " + x
+        sys.exit(0)
+
+else:
+    print "UNKNOWN - check service"
+    sys.exit(3)
